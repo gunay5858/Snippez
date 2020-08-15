@@ -18,6 +18,8 @@ public class CodeSnippet {
     @GeneratedValue
     private Long id;
 
+    private String title;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="creator_id")
     private User createdBy;

@@ -19,6 +19,8 @@ public class Category {
 
     private String name;
 
+    private String icon;
+
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="creator_id")
     private User createdBy;
