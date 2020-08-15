@@ -1,6 +1,5 @@
 package com.ghlabs.snippez.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,24 +12,20 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {"password"}, allowSetters = true, allowGetters = false)
-public class User {
+public class Category {
     @Id
     @GeneratedValue
     private Long id;
 
-    private String username;
+    private String name;
 
-    private String password;
+    @ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="creator_id")
+    private User createdBy;
 
-    private String email;
-
-    private String phone;
-
-    private String avatar;
-
-    @OneToMany(mappedBy = "createdBy")
-    private List<Category> categories;
+    @OneToMany(fetch=FetchType.LAZY)
+    @JoinColumn(name="category_id")
+    private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
