@@ -44,4 +44,32 @@ public class UserService {
     public User findUserByUsername(String username) throws NonUniqueResultException {
         return this.mRepository.findUserByUsername(username);
     }
+
+    public User updateUser(Long id, User user) {
+        if (mRepository.findById(id).isPresent()) {
+            User dbUser = mRepository.findById(id).get();
+            dbUser.setId(id);
+
+            // encrypt password if new one is set
+            if (user.getPassword() != null) {
+                dbUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+            }
+
+            if (user.getAvatar() != null) {
+                dbUser.setAvatar(user.getAvatar());
+            }
+
+            if (user.getEmail() != null) {
+                dbUser.setEmail(user.getEmail());
+            }
+
+            return mRepository.save(dbUser);
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteUserById(Long id) {
+        mRepository.deleteById(id);
+    }
 }

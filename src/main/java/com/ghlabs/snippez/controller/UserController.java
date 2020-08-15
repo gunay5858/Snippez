@@ -52,4 +52,24 @@ public class UserController {
 
         return ResponseEntity.ok(new BasicSingleResponse(true, u, Response.SC_OK));
     }
+
+    //TODO: only execute if user is authenticated and is given user
+    @PutMapping("/update/{userId}")
+    public ResponseEntity<BasicSingleResponse> updateUser(@PathVariable("userId") @NotBlank Long userId, @RequestBody @NotBlank User user) throws NotFoundException {
+        User foundUser = userService.findUserById(userId);
+        if (foundUser == null) {
+            throw new NotFoundException("user not found.");
+        }
+        return ResponseEntity.ok(new BasicSingleResponse(true, userService.updateUser(userId, user), Response.SC_OK));
+    }
+
+    @DeleteMapping(value = "/delete/{userId}")
+    public ResponseEntity<BasicSingleResponse> deleteUser(@PathVariable("userId") @NotBlank long userId) throws NotFoundException {
+        User foundUser = userService.findUserById(userId);
+        if (foundUser == null) {
+            throw new NotFoundException("user not found.");
+        }
+        userService.deleteUserById(userId);
+        return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
+    }
 }
