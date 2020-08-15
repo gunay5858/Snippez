@@ -1,11 +1,13 @@
 package com.ghlabs.snippez.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -28,8 +30,11 @@ public class User {
 
     private String avatar;
 
-    @OneToMany(mappedBy = "createdBy")
-    private List<Category> categories;
+    @OneToMany(mappedBy = "createdBy",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @JsonManagedReference
+    private List<Category> categories = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;

@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -22,11 +24,11 @@ public class Category {
     private String icon;
 
     @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="creator_id")
+    @JoinColumn(name="creator_id", referencedColumnName = "id")
+    @JsonBackReference
     private User createdBy;
 
-    @OneToMany(fetch=FetchType.LAZY)
-    @JoinColumn(name="category_id")
+    @OneToMany(fetch=FetchType.EAGER)
     private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -44,5 +46,31 @@ public class Category {
     @PreUpdate
     private void updatedAt() {
         this.updatedAt = new Date();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Category category = (Category) o;
+        return id.equals(category.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", createdBy=" + createdBy +
+                ", snippets=" + snippets +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
