@@ -46,7 +46,6 @@ public class UserService {
 
     public UserDTO findUserById(Long id) {
         if (mRepository.findById(id).isPresent()) {
-            // return mRepository.findById(id).get();
             return modelMapper.map(mRepository.findById(id).get(), UserDTO.class);
         } else {
             return null;

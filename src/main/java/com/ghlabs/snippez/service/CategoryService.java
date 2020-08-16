@@ -36,7 +36,6 @@ public class CategoryService {
     }
 
     public CategoryDTO addCategory(Category category) {
-        System.out.println("###### " + category.getCreator().getId());
         UserDTO creator = null;
         try {
             creator = modelMapper.map(userRepository.findById(category.getCreator().getId()).get(), UserDTO.class);
@@ -53,5 +52,13 @@ public class CategoryService {
                 .setMatchingStrategy(MatchingStrategies.LOOSE);
         return modelMapper
                 .map(category, CategoryDTO.class);
+    }
+
+    public CategoryDTO findCategoryById(Long catId) {
+        if (categoryRepository.findById(catId).isPresent()) {
+            return modelMapper.map(categoryRepository.findById(catId).get(), CategoryDTO.class);
+        } else {
+            return null;
+        }
     }
 }

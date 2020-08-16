@@ -37,6 +37,16 @@ public class CategoryController {
         return ResponseEntity.ok(new BasicListResponse(true, categoryService.findAllCategories(), Response.SC_OK));
     }
 
+    @GetMapping("/id/{catId}")
+    @ResponseBody
+    public ResponseEntity<BasicSingleResponse> findCategoryById(@PathVariable("catId") @NotBlank Long catId) throws NotFoundException {
+        CategoryDTO foundCategory = categoryService.findCategoryById(catId);
+        if (foundCategory == null) {
+            throw new NotFoundException("category not found.");
+        }
+        return ResponseEntity.ok(new BasicSingleResponse(true, foundCategory, Response.SC_OK));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<BasicSingleResponse> createCategory(@RequestBody @NotBlank Category category) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException {
         if (category == null) {
