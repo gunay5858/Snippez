@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.ControllerAdvice;
 
+import com.ghlabs.snippez.controller.UserController;
 import com.ghlabs.snippez.exception.UserAlreadyExistsException;
 import com.ghlabs.snippez.response.ApiError;
 import com.ghlabs.snippez.response.ApiErrorResponse;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-@RestControllerAdvice
+@RestControllerAdvice(assignableTypes = UserController.class)
 public class UserServiceExceptionHandler {
     @ExceptionHandler({UserAlreadyExistsException.class})
     public ResponseEntity<ApiErrorResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e) {

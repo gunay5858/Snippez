@@ -1,6 +1,7 @@
 package com.ghlabs.snippez.service;
 
 import com.ghlabs.snippez.dto.CategoryDTO;
+import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.repository.CategoryRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,8 +36,14 @@ public class CategoryService {
     }
 
     public CategoryDTO addCategory(Category category) {
-        System.out.println("++++++++++ " + category.getCreator().toString());
-        User creator = userRepository.findById(category.getCreator().getId()).get();
+        System.out.println("###### " + category.getCreator().getId());
+        UserDTO creator = null;
+        try {
+            creator = modelMapper.map(userRepository.findById(category.getCreator().getId()).get(), UserDTO.class);
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+
         category.setCreator(modelMapper.map(creator, User.class));
         return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
     }
