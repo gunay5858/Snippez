@@ -15,7 +15,7 @@ import java.util.Date;
 public class CodeSnippet {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String title;

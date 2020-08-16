@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.controller;
 
+import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.UserAlreadyExistsException;
 import com.ghlabs.snippez.response.BasicListResponse;
@@ -15,6 +16,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -29,13 +31,13 @@ public class UserController {
     @GetMapping
     @ResponseBody
     public ResponseEntity<BasicListResponse> getAllUsers() {
-        ArrayList<Object> userList = userService.findAllUsers();
+        List<UserDTO> userList = userService.findAllUsers();
         return ResponseEntity.ok(new BasicListResponse(true, userList, Response.SC_OK));
     }
 
     @GetMapping("/id/{userId}")
     public ResponseEntity<BasicSingleResponse> getUserById(@PathVariable("userId") @NotBlank Long userId) throws NotFoundException, MethodArgumentTypeMismatchException {
-        User foundUser = userService.findUserById(userId);
+        UserDTO foundUser = userService.findUserById(userId);
         if (foundUser == null) {
             throw new NotFoundException("user not found.");
         }
@@ -56,7 +58,7 @@ public class UserController {
     //TODO: only execute if user is authenticated and is given user
     @PutMapping("/update/{userId}")
     public ResponseEntity<BasicSingleResponse> updateUser(@PathVariable("userId") @NotBlank Long userId, @RequestBody @NotBlank User user) throws NotFoundException {
-        User foundUser = userService.findUserById(userId);
+        UserDTO foundUser = userService.findUserById(userId);
         if (foundUser == null) {
             throw new NotFoundException("user not found.");
         }
@@ -65,7 +67,7 @@ public class UserController {
 
     @DeleteMapping(value = "/delete/{userId}")
     public ResponseEntity<BasicSingleResponse> deleteUser(@PathVariable("userId") @NotBlank long userId) throws NotFoundException {
-        User foundUser = userService.findUserById(userId);
+        UserDTO foundUser = userService.findUserById(userId);
         if (foundUser == null) {
             throw new NotFoundException("user not found.");
         }

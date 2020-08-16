@@ -1,6 +1,8 @@
 package com.ghlabs.snippez.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,21 +16,23 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Category {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
 
     private String icon;
 
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="creator_id", referencedColumnName = "id")
-    @JsonBackReference
-    private User createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    private User creator;
 
-    @OneToMany(fetch=FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER)
     private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -67,7 +71,7 @@ public class Category {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", icon='" + icon + '\'' +
-                ", createdBy=" + createdBy +
+                ", creator=" + creator +
                 ", snippets=" + snippets +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +

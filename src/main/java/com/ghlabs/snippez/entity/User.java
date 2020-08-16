@@ -1,7 +1,9 @@
 package com.ghlabs.snippez.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,10 +18,13 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIgnoreProperties(value = {"password"}, allowSetters = true, allowGetters = false)
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
+//@JsonIgnoreProperties(value = {"password"}, allowSetters = true, allowGetters = false)
 public class User {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String username;
@@ -30,10 +35,10 @@ public class User {
 
     private String avatar;
 
-    @OneToMany(mappedBy = "createdBy",
+    @OneToMany(mappedBy = "creator",
+            targetEntity = Category.class,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    @JsonManagedReference
     private List<Category> categories = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)

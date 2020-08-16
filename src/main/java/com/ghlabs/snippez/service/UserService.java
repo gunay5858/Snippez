@@ -1,7 +1,10 @@
 package com.ghlabs.snippez.service;
 
+import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.repository.UserRepository;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -9,6 +12,8 @@ import org.springframework.stereotype.Service;
 import javax.persistence.NonUniqueResultException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -16,12 +21,18 @@ public class UserService {
     int bcryptStrength = 10;
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(bcryptStrength, new SecureRandom());
 
+    private final ModelMapper modelMapper = new ModelMapper();
+
     public UserService(@Autowired UserRepository mRepository) {
         this.mRepository = mRepository;
     }
 
-    public ArrayList<Object> findAllUsers() {
-        return mRepository.findAllUsers();
+    public List<UserDTO> findAllUsers() {
+        return ((List<User>) mRepository
+                .findAll())
+                .stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
     }
 
     public User addUser(User user) {
@@ -33,9 +44,10 @@ public class UserService {
         return null;
     }
 
-    public User findUserById(Long id) {
+    public UserDTO findUserById(Long id) {
         if (mRepository.findById(id).isPresent()) {
-            return mRepository.findById(id).get();
+            // return mRepository.findById(id).get();
+            return modelMapper.map(mRepository.findById(id).get(), UserDTO.class);
         } else {
             return null;
         }
@@ -71,5 +83,13 @@ public class UserService {
 
     public void deleteUserById(Long id) {
         mRepository.deleteById(id);
+    }
+
+    private UserDTO convertToUserDTO(User user) {
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.LOOSE);
+        UserDTO userDTO = modelMapper
+                .map(user, UserDTO.class);
+        return userDTO;
     }
 }

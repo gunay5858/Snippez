@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.controller;
 
+import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.UserAlreadyExistsException;
@@ -34,9 +35,6 @@ public class CategoryController {
 
     @PostMapping("/create")
     public ResponseEntity<BasicSingleResponse> createCategory(@RequestBody @NotBlank Category category) {
-        User refCreator = userService.findUserById(category.getCreatedBy().getId());
-        category.setCreatedBy(refCreator);
-
         return ResponseEntity.ok(new BasicSingleResponse(true, categoryService.addCategory(category), Response.SC_OK));
     }
 }

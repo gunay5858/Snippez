@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @AllArgsConstructor
 @Getter
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BasicListResponse {
     private boolean status = true;
-    private ArrayList<Object> data;
+    private List<?> data;
 
     @JsonIgnore
     private int statusCode = 200;
