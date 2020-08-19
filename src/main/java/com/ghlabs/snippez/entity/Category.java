@@ -28,7 +28,7 @@ public class Category {
 
     private String icon;
 
-    private boolean isPublic;
+    private boolean isPublic = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator", referencedColumnName = "id")

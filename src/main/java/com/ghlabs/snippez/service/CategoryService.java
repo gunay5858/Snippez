@@ -47,13 +47,6 @@ public class CategoryService {
         return modelMapper.map(categoryRepository.save(category), CategoryDTO.class);
     }
 
-    private CategoryDTO convertToCategoryDTO(Category category) {
-        modelMapper.getConfiguration()
-                .setMatchingStrategy(MatchingStrategies.LOOSE);
-        return modelMapper
-                .map(category, CategoryDTO.class);
-    }
-
     public CategoryDTO findCategoryById(Long catId) {
         if (categoryRepository.findById(catId).isPresent()) {
             return modelMapper.map(categoryRepository.findById(catId).get(), CategoryDTO.class);
@@ -84,5 +77,21 @@ public class CategoryService {
 
     public void deleteCategoryId(long catId) {
         categoryRepository.deleteById(catId);
+    }
+
+
+    public List<CategoryDTO> findCategoriesOfUser(Long userId) {
+        return ((List<Category>) categoryRepository
+                .findCategoriesOfUser(userId))
+                .stream()
+                .map(this::convertToCategoryDTO)
+                .collect(Collectors.toList());
+    }
+
+    private CategoryDTO convertToCategoryDTO(Category category) {
+        modelMapper.getConfiguration()
+                .setMatchingStrategy(MatchingStrategies.LOOSE);
+        return modelMapper
+                .map(category, CategoryDTO.class);
     }
 }
