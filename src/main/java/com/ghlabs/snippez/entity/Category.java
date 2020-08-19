@@ -28,13 +28,15 @@ public class Category {
 
     private String icon;
 
-    private boolean isPublic = true;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator", referencedColumnName = "id")
     private User creator;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "category",
+            fetch = FetchType.LAZY,
+            targetEntity = CodeSnippet.class,
+            cascade = CascadeType.PERSIST,
+            orphanRemoval = true)
     private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)

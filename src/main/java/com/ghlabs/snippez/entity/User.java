@@ -35,6 +35,9 @@ public class User {
 
     private String avatar;
 
+    @ManyToMany(mappedBy = "sharedUsers")
+    private List<CodeSnippet> sharedSnippets;
+
     @OneToMany(mappedBy = "creator",
             targetEntity = Category.class,
             cascade = CascadeType.REMOVE,
