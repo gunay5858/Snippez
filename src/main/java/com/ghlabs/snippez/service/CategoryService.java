@@ -61,4 +61,8 @@ public class CategoryService {
             return null;
         }
     }
+
+    public void deleteCategoryId(long catId) {
+        categoryRepository.deleteById(catId);
+    }
 }

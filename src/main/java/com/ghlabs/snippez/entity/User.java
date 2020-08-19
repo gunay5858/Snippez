@@ -37,7 +37,7 @@ public class User {
 
     @OneToMany(mappedBy = "creator",
             targetEntity = Category.class,
-            cascade = CascadeType.ALL,
+            cascade = CascadeType.REMOVE,
             orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();
 

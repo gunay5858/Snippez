@@ -3,9 +3,7 @@ package com.ghlabs.snippez.controller;
 import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.Category;
-import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
-import com.ghlabs.snippez.exception.UserAlreadyExistsException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
@@ -18,7 +16,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotBlank;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/category")
@@ -64,5 +61,16 @@ public class CategoryController {
         }
 
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
+    }
+
+    @DeleteMapping(value = "/delete/{catId}")
+    public ResponseEntity<BasicSingleResponse> deleteCategory(@PathVariable("catId") @NotBlank long catId) throws NotFoundException {
+        CategoryDTO foundCategory = categoryService.findCategoryById(catId);
+        if (foundCategory == null) {
+            throw new NotFoundException("category not found.");
+        }
+
+        categoryService.deleteCategoryId(catId);
+        return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
     }
 }

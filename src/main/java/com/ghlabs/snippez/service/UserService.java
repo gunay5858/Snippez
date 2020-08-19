@@ -87,8 +87,7 @@ public class UserService {
     private UserDTO convertToUserDTO(User user) {
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.LOOSE);
-        UserDTO userDTO = modelMapper
+        return modelMapper
                 .map(user, UserDTO.class);
-        return userDTO;
     }
 }
