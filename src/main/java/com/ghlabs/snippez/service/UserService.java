@@ -56,7 +56,7 @@ public class UserService {
         return this.mRepository.findUserByUsername(username);
     }
 
-    public User updateUser(Long id, User user) {
+    public UserDTO updateUser(Long id, User user) {
         if (mRepository.findById(id).isPresent()) {
             User dbUser = mRepository.findById(id).get();
             dbUser.setId(id);
@@ -74,7 +74,7 @@ public class UserService {
                 dbUser.setEmail(user.getEmail());
             }
 
-            return mRepository.save(dbUser);
+            return modelMapper.map(mRepository.save(dbUser), UserDTO.class);
         } else {
             return null;
         }

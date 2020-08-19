@@ -62,6 +62,26 @@ public class CategoryService {
         }
     }
 
+    public CategoryDTO updateCategory(Long id, Category category) {
+        if (categoryRepository.findById(id).isPresent()) {
+            Category dbCategory = categoryRepository.findById(id).get();
+            dbCategory.setId(id);
+
+            // encrypt password if new one is set
+            if (category.getName() != null) {
+                dbCategory.setName(category.getName());
+            }
+
+            if (category.getIcon() != null) {
+                dbCategory.setIcon(category.getIcon());
+            }
+
+            return modelMapper.map(categoryRepository.save(dbCategory), CategoryDTO.class);
+        } else {
+            return null;
+        }
+    }
+
     public void deleteCategoryId(long catId) {
         categoryRepository.deleteById(catId);
     }

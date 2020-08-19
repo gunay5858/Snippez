@@ -3,6 +3,7 @@ package com.ghlabs.snippez.controller;
 import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.Category;
+import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
@@ -61,6 +62,15 @@ public class CategoryController {
         }
 
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
+    }
+
+    @PutMapping("/update/{catId}")
+    public ResponseEntity<BasicSingleResponse> updateCategory(@PathVariable("catId") @NotBlank Long catId, @RequestBody @NotBlank Category category) throws NotFoundException {
+        CategoryDTO foundUser = categoryService.findCategoryById(catId);
+        if (foundUser == null) {
+            throw new NotFoundException("category not found.");
+        }
+        return ResponseEntity.ok(new BasicSingleResponse(true, categoryService.updateCategory(catId, category), Response.SC_OK));
     }
 
     @DeleteMapping(value = "/delete/{catId}")

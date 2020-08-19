@@ -28,8 +28,10 @@ public class Category {
 
     private String icon;
 
+    private boolean isPublic;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_id", referencedColumnName = "id")
+    @JoinColumn(name = "creator", referencedColumnName = "id")
     private User creator;
 
     @OneToMany(fetch = FetchType.EAGER)
