@@ -20,8 +20,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id")
-//@JsonIgnoreProperties(value = {"password"}, allowSetters = true, allowGetters = false)
+        property = "id", scope = User.class)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -43,6 +42,12 @@ public class User {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "creator",
+            targetEntity = CodeSnippet.class,
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true)
+    private List<CodeSnippet> codeSnippets = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;

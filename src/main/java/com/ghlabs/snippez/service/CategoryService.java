@@ -27,7 +27,6 @@ public class CategoryService {
     }
 
     public List<CategoryDTO> findAllCategories() {
-        //return categoryRepository.findAllCategories();
         return ((List<Category>) categoryRepository
                 .findAll())
                 .stream()
