@@ -25,9 +25,23 @@ public class CategoryDTO {
     @JsonIgnoreProperties("categories")
     private UserDTO creator;
 
+    @JsonIgnoreProperties("snippets")
     private List<CodeSnippet> snippets;
 
     private Date createdAt;
 
     private Date updatedAt;
+
+    @Override
+    public String toString() {
+        return "CategoryDTO{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", creator=" + creator +
+                ", snippets=" + snippets +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }

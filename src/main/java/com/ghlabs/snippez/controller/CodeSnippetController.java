@@ -1,13 +1,12 @@
 package com.ghlabs.snippez.controller;
 
-import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.CodeSnippetDTO;
-import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.entity.CodeSnippet;
-import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
+import com.ghlabs.snippez.exception.CodeSnippetCreatorNotFoundException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CodeSnippetService;
+import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ import javax.validation.constraints.NotBlank;
 public class CodeSnippetController {
     private final CodeSnippetService codeSnippetService;
 
-    public CodeSnippetController(CodeSnippetService codeSnippetService) {
+    public CodeSnippetController(@Autowired CodeSnippetService codeSnippetService) {
         this.codeSnippetService = codeSnippetService;
     }
 
@@ -32,20 +31,24 @@ public class CodeSnippetController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException {
+    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException {
         if (codeSnippet == null) {
             throw new HttpMessageNotReadableException(null);
         }
 
         if (codeSnippet.getCreator() == null) {
-            throw new CategoryCreatorNotFoundException("Cannot create code snippet without creator.");
+            throw new CodeSnippetCreatorNotFoundException("Cannot create code snippet without creator.");
+        }
+
+        try {
+            if (codeSnippet.getCategory().getId() == null) {
+                throw new NotFoundException("category not found.");
+            }
+        } catch (NullPointerException e) {
+            codeSnippet.setCategory(null);
         }
 
         CodeSnippetDTO c = codeSnippetService.addCodeSnippet(codeSnippet);
-
-        if (c == null) {
-            throw new CategoryCreatorNotFoundException("The provided creator does not exist.");
-        }
 
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
     }

@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.entity.User;
 import lombok.AllArgsConstructor;
@@ -20,9 +21,11 @@ public class CodeSnippetDTO {
 
     private String title;
 
-    private User createdBy;
+    @JsonIgnoreProperties("categories")
+    private UserDTO createdBy;
 
-    private Category category;
+    @JsonIgnoreProperties("creator")
+    private CategoryDTO category;
 
     private String description;
 
@@ -32,9 +35,9 @@ public class CodeSnippetDTO {
 
     private String tags;
 
-    private User creator;
+    private UserDTO creator;
 
-    private List<User> sharedUsers;
+    private List<UserDTO> sharedUsers;
 
     private Date createdAt;
 

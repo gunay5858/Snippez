@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -16,17 +17,20 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIdentityInfo(generator= ObjectIdGenerators.IntSequenceGenerator.class,property="id", scope = CodeSnippet.class)
-public class CodeSnippet {
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id", scope = CodeSnippet.class)
+public class CodeSnippet implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "_seq_codeSnippet")
+    @SequenceGenerator(name = "_seq_codeSnippet", sequenceName = "_seq_codeSnippet", initialValue = 1, allocationSize=1)
     private Long id;
 
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = Category.class)
-    @JoinColumn(name = "category")
+    @JoinColumn(name = "category", referencedColumnName = "id")
     private Category category;
 
     private String description;
@@ -37,7 +41,7 @@ public class CodeSnippet {
 
     private String tags;
 
-    @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class, cascade = CascadeType.MERGE)
     @JoinColumn(name = "creator", referencedColumnName = "id")
     private User creator;
 

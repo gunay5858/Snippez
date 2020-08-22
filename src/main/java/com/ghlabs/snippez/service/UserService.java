@@ -1,10 +1,7 @@
 package com.ghlabs.snippez.service;
 
-import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.UserDTO;
-import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.entity.User;
-import com.ghlabs.snippez.repository.CategoryRepository;
 import com.ghlabs.snippez.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -20,15 +17,13 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private final UserRepository mRepository;
-    private final CategoryRepository categoryRepository;
     int bcryptStrength = 10;
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(bcryptStrength, new SecureRandom());
 
     private final ModelMapper modelMapper = new ModelMapper();
 
-    public UserService(@Autowired UserRepository mRepository, CategoryRepository categoryRepository) {
+    public UserService(@Autowired UserRepository mRepository) {
         this.mRepository = mRepository;
-        this.categoryRepository = categoryRepository;
     }
 
     public List<UserDTO> findAllUsers() {

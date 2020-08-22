@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -18,10 +19,11 @@ import java.util.Objects;
 @NoArgsConstructor
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id")
-public class Category {
+        property = "id", scope = Category.class)
+public class Category implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "_seq_category")
+    @SequenceGenerator(name = "_seq_category", sequenceName = "_seq_category", initialValue = 1, allocationSize=1)
     private Long id;
 
     private String name;
@@ -35,8 +37,7 @@ public class Category {
     @OneToMany(mappedBy = "category",
             fetch = FetchType.LAZY,
             targetEntity = CodeSnippet.class,
-            cascade = CascadeType.PERSIST,
-            orphanRemoval = true)
+            cascade = CascadeType.PERSIST)
     private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)
