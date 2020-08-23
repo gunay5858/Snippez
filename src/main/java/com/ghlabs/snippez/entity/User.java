@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,10 +28,13 @@ public class User implements Serializable {
     @SequenceGenerator(name = "_seq_user", sequenceName = "_seq_user", initialValue = 1, allocationSize=1)
     private Long id;
 
+    @NotEmpty(message = "Please provide a username")
     private String username;
 
+    @NotEmpty(message = "Please provide a password")
     private String password;
 
+    @NotEmpty(message = "Please provide an email")
     private String email;
 
     private String avatar;

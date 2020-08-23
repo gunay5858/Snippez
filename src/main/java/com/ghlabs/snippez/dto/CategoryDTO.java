@@ -22,7 +22,7 @@ public class CategoryDTO {
 
     private String icon;
 
-    @JsonIgnoreProperties("categories")
+    @JsonIgnoreProperties("creator")
     private UserDTO creator;
 
     @JsonIgnoreProperties("snippets")

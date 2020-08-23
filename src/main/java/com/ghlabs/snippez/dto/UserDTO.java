@@ -25,7 +25,7 @@ public class UserDTO {
 
     private String avatar;
 
-    @JsonIgnoreProperties("creator")
+    @JsonIgnoreProperties("categories")
     private List<CategoryDTO> categories = new ArrayList<>();
 
     private Date createdAt;

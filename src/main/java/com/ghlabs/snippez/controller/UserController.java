@@ -15,6 +15,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public class UserController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createUser(@RequestBody @NotBlank User user) throws UserAlreadyExistsException, HttpMessageNotReadableException {
+    public ResponseEntity<BasicSingleResponse> createUser(@Valid @RequestBody @NotBlank User user) throws UserAlreadyExistsException, HttpMessageNotReadableException {
         User u = userService.addUser(user);
         if (u == null) {
             throw new UserAlreadyExistsException(user.getUsername());

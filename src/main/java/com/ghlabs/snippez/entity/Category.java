@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -26,12 +27,14 @@ public class Category implements Serializable {
     @SequenceGenerator(name = "_seq_category", sequenceName = "_seq_category", initialValue = 1, allocationSize=1)
     private Long id;
 
+    @NotEmpty(message = "Please provide a name")
     private String name;
 
     private String icon;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator", referencedColumnName = "id")
+    @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
+    @NotEmpty(message = "Please provide a creator")
     private User creator;
 
     @OneToMany(mappedBy = "category",

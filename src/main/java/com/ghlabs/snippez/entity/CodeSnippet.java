@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ public class CodeSnippet implements Serializable {
     @SequenceGenerator(name = "_seq_codeSnippet", sequenceName = "_seq_codeSnippet", initialValue = 1, allocationSize=1)
     private Long id;
 
+    @NotEmpty(message = "Please provide a title")
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = Category.class)
@@ -35,14 +37,17 @@ public class CodeSnippet implements Serializable {
 
     private String description;
 
+    @NotEmpty(message = "Please provide some code")
     private String code;
 
+    @NotEmpty(message = "Please add privacy settings")
     private boolean isPublic = true;
 
     private String tags;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class, cascade = CascadeType.MERGE)
-    @JoinColumn(name = "creator", referencedColumnName = "id")
+    @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
+    @NotEmpty(message = "Please provide a creator")
     private User creator;
 
     @ManyToMany(cascade = {

@@ -1,14 +1,11 @@
 package com.ghlabs.snippez.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.ghlabs.snippez.entity.Category;
-import com.ghlabs.snippez.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
@@ -21,10 +18,10 @@ public class CodeSnippetDTO {
 
     private String title;
 
-    @JsonIgnoreProperties("categories")
-    private UserDTO createdBy;
-
     @JsonIgnoreProperties("creator")
+    private UserDTO creator;
+
+    @JsonIgnoreProperties("categories")
     private CategoryDTO category;
 
     private String description;
@@ -34,8 +31,6 @@ public class CodeSnippetDTO {
     private boolean isPublic = true;
 
     private String tags;
-
-    private UserDTO creator;
 
     private List<UserDTO> sharedUsers;
 
