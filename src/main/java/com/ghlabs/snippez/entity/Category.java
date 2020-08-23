@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -34,13 +35,12 @@ public class Category implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
-    @NotEmpty(message = "Please provide a creator")
     private User creator;
 
     @OneToMany(mappedBy = "category",
             fetch = FetchType.LAZY,
             targetEntity = CodeSnippet.class,
-            cascade = CascadeType.PERSIST)
+            cascade = CascadeType.MERGE)
     private List<CodeSnippet> snippets;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -84,5 +84,14 @@ public class Category implements Serializable {
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';
+    }
+
+    @PreRemove
+    void preRemove() {
+        for (CodeSnippet s : this.getSnippets()) {
+            s.setCategory(null);
+        }
+
+        this.setCreator(null);
     }
 }

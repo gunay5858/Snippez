@@ -1,9 +1,7 @@
 package com.ghlabs.snippez.controller;
 
 import com.ghlabs.snippez.dto.CategoryDTO;
-import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.Category;
-import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
@@ -16,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
@@ -46,7 +45,7 @@ public class CategoryController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createCategory(@RequestBody @NotBlank Category category) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException {
+    public ResponseEntity<BasicSingleResponse> createCategory(@Valid @RequestBody @NotBlank Category category) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException {
         if (category == null) {
             throw new HttpMessageNotReadableException(null);
         }
@@ -80,7 +79,7 @@ public class CategoryController {
             throw new NotFoundException("category not found.");
         }
 
-        categoryService.deleteCategoryId(catId);
+        categoryService.deleteCategoryById(catId);
         return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
     }
 }

@@ -58,6 +58,18 @@ public class CodeSnippetService {
         return modelMapper.map(codeSnippetRepository.save(codeSnippet), CodeSnippetDTO.class);
     }
 
+    public CodeSnippetDTO findById(Long id) {
+        if (codeSnippetRepository.findById(id).isPresent()) {
+            return modelMapper.map(codeSnippetRepository.findById(id).get(), CodeSnippetDTO.class);
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteCodeSnippetById(Long id) {
+        codeSnippetRepository.deleteById(id);
+    }
+
     private CodeSnippetDTO convertToCodeSnippetDTO(CodeSnippet codeSnippet) {
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.LOOSE);

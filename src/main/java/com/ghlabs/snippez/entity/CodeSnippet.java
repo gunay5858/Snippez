@@ -40,14 +40,12 @@ public class CodeSnippet implements Serializable {
     @NotEmpty(message = "Please provide some code")
     private String code;
 
-    @NotEmpty(message = "Please add privacy settings")
     private boolean isPublic = true;
 
     private String tags;
 
     @ManyToOne(fetch = FetchType.LAZY, targetEntity = User.class, cascade = CascadeType.MERGE)
     @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
-    @NotEmpty(message = "Please provide a creator")
     private User creator;
 
     @ManyToMany(cascade = {

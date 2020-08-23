@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.controller;
 
+import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.CodeSnippetDTO;
 import com.ghlabs.snippez.entity.CodeSnippet;
 import com.ghlabs.snippez.exception.CodeSnippetCreatorNotFoundException;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 @RestController
@@ -31,7 +33,7 @@ public class CodeSnippetController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException {
+    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@Valid @RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException {
         if (codeSnippet == null) {
             throw new HttpMessageNotReadableException(null);
         }
@@ -51,5 +53,16 @@ public class CodeSnippetController {
         CodeSnippetDTO c = codeSnippetService.addCodeSnippet(codeSnippet);
 
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
+    }
+
+    @DeleteMapping(value = "/delete/{snippetId}")
+    public ResponseEntity<BasicSingleResponse> deleteCodeSnippet(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException {
+        CodeSnippetDTO foundSnippet = codeSnippetService.findById(snippetId);
+        if (foundSnippet == null) {
+            throw new NotFoundException("code snippet not found.");
+        }
+
+        codeSnippetService.deleteCodeSnippetById(snippetId);
+        return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
     }
 }
