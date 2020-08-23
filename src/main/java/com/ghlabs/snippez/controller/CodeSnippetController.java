@@ -32,6 +32,18 @@ public class CodeSnippetController {
         return ResponseEntity.ok(new BasicListResponse(true, codeSnippetService.findAllCodeSnippets(), Response.SC_OK));
     }
 
+
+
+    @GetMapping(value = "/id/{snippetId}")
+    public ResponseEntity<BasicSingleResponse> findCodeSnippetById(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException {
+        CodeSnippetDTO foundSnippet = codeSnippetService.findById(snippetId);
+        if (foundSnippet == null) {
+            throw new NotFoundException("code snippet not found.");
+        }
+
+        return ResponseEntity.ok(new BasicSingleResponse(true, codeSnippetService.findById(snippetId), Response.SC_OK));
+    }
+
     @PostMapping("/create")
     public ResponseEntity<BasicSingleResponse> createCodeSnippet(@Valid @RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException {
         if (codeSnippet == null) {
