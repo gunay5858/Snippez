@@ -6,6 +6,7 @@ import com.ghlabs.snippez.entity.CodeSnippet;
 import com.ghlabs.snippez.exception.CodeSnippetCreatorNotFoundException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
+import com.ghlabs.snippez.service.CategoryService;
 import com.ghlabs.snippez.service.CodeSnippetService;
 import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
@@ -21,9 +22,11 @@ import javax.validation.constraints.NotBlank;
 @RequestMapping("/snippet")
 public class CodeSnippetController {
     private final CodeSnippetService codeSnippetService;
+    private final CategoryService categoryService;
 
-    public CodeSnippetController(@Autowired CodeSnippetService codeSnippetService) {
+    public CodeSnippetController(@Autowired CodeSnippetService codeSnippetService, @Autowired CategoryService categoryService) {
         this.codeSnippetService = codeSnippetService;
+        this.categoryService = categoryService;
     }
 
     @GetMapping
@@ -65,6 +68,25 @@ public class CodeSnippetController {
         CodeSnippetDTO c = codeSnippetService.addCodeSnippet(codeSnippet);
 
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
+    }
+
+    @PutMapping("/update/{snippetId}")
+    public ResponseEntity<BasicSingleResponse> updateCodeSnippet(@PathVariable("snippetId") @NotBlank Long snippetId, @RequestBody @NotBlank CodeSnippet codeSnippet) throws NotFoundException {
+        CodeSnippetDTO foundCodeSnippet = codeSnippetService.findById(snippetId);
+        if (foundCodeSnippet == null) {
+            throw new NotFoundException("code snippet not found.");
+        }
+
+        try {
+            CategoryDTO foundCategory = categoryService.findCategoryById(codeSnippet.getCategory().getId());
+            if (foundCategory == null) {
+                throw new NotFoundException("category not found.");
+            }
+        } catch (NullPointerException e) {
+            codeSnippet.setCategory(null);
+        }
+
+        return ResponseEntity.ok(new BasicSingleResponse(true, codeSnippetService.updateCodeSnippet(snippetId, codeSnippet), Response.SC_OK));
     }
 
     @DeleteMapping(value = "/delete/{snippetId}")

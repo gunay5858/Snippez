@@ -65,8 +65,8 @@ public class CategoryController {
 
     @PutMapping("/update/{catId}")
     public ResponseEntity<BasicSingleResponse> updateCategory(@PathVariable("catId") @NotBlank Long catId, @RequestBody @NotBlank Category category) throws NotFoundException {
-        CategoryDTO foundUser = categoryService.findCategoryById(catId);
-        if (foundUser == null) {
+        CategoryDTO foundCategory = categoryService.findCategoryById(catId);
+        if (foundCategory == null) {
             throw new NotFoundException("category not found.");
         }
         return ResponseEntity.ok(new BasicSingleResponse(true, categoryService.updateCategory(catId, category), Response.SC_OK));

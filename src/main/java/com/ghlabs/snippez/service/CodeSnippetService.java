@@ -66,6 +66,43 @@ public class CodeSnippetService {
         }
     }
 
+    public CodeSnippetDTO updateCodeSnippet(Long id, CodeSnippet codeSnippet) {
+        if (codeSnippetRepository.findById(id).isPresent()) {
+            CodeSnippet dbSnippet = codeSnippetRepository.findById(id).get();
+            dbSnippet.setId(id);
+
+            if (codeSnippet.getTitle() != null) {
+                dbSnippet.setTitle(codeSnippet.getTitle());
+            }
+
+            try {
+                if (!codeSnippet.getCategory().getId().equals(dbSnippet.getCategory().getId())) {
+                    dbSnippet.setCategory(codeSnippet.getCategory());
+                }
+            } catch (NullPointerException e) {
+                dbSnippet.setCategory(codeSnippet.getCategory());
+            }
+
+            if (codeSnippet.getDescription() != null) {
+                dbSnippet.setDescription(codeSnippet.getDescription());
+            }
+
+            if (codeSnippet.getCode() != null) {
+                dbSnippet.setCode(codeSnippet.getCode());
+            }
+
+            dbSnippet.setPublic(codeSnippet.isPublic());
+
+            if (codeSnippet.getTags() != null) {
+                dbSnippet.setTags(codeSnippet.getTags());
+            }
+
+            return modelMapper.map(codeSnippetRepository.save(dbSnippet), CodeSnippetDTO.class);
+        } else {
+            return null;
+        }
+    }
+
     public void deleteCodeSnippetById(Long id) {
         codeSnippetRepository.deleteById(id);
     }
