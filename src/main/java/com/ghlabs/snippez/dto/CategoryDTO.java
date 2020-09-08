@@ -2,7 +2,6 @@ package com.ghlabs.snippez.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ghlabs.snippez.entity.CodeSnippet;
-import com.ghlabs.snippez.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,10 +21,8 @@ public class CategoryDTO {
 
     private String icon;
 
-    @JsonIgnoreProperties("creator")
     private UserDTO creator;
 
-    @JsonIgnoreProperties("snippets")
     private List<CodeSnippet> snippets;
 
     private Date createdAt;

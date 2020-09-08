@@ -18,10 +18,8 @@ public class CodeSnippetDTO {
 
     private String title;
 
-    @JsonIgnoreProperties("creator")
     private UserDTO creator;
 
-    @JsonIgnoreProperties("categories")
     private CategoryDTO category;
 
     private String description;
