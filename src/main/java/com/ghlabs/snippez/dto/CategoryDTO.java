@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -30,6 +31,19 @@ public class CategoryDTO {
     private Date updatedAt;
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CategoryDTO that = (CategoryDTO) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
     public String toString() {
         return "CategoryDTO{" +
                 "id=" + id +
@@ -41,4 +55,6 @@ public class CategoryDTO {
                 ", updatedAt=" + updatedAt +
                 '}';
     }
+
+
 }

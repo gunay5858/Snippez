@@ -11,6 +11,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -30,4 +31,18 @@ public class UserDTO {
     private Date createdAt;
 
     private Date updatedAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDTO userDTO = (UserDTO) o;
+        return id.equals(userDTO.id) &&
+                username.equals(userDTO.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username);
+    }
 }
