@@ -1,8 +1,6 @@
 package com.ghlabs.snippez.ControllerAdvice;
 
-import com.ghlabs.snippez.controller.CategoryController;
 import com.ghlabs.snippez.controller.CodeSnippetController;
-import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
 import com.ghlabs.snippez.exception.CodeSnippetCreatorNotFoundException;
 import com.ghlabs.snippez.response.ApiError;
 import com.ghlabs.snippez.response.ApiErrorResponse;
