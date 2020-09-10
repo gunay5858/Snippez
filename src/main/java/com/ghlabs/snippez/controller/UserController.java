@@ -1,5 +1,6 @@
 package com.ghlabs.snippez.controller;
 
+import com.ghlabs.snippez.dto.AuthRequest;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.UserAlreadyExistsException;
@@ -7,11 +8,15 @@ import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
 import com.ghlabs.snippez.service.UserService;
+import com.ghlabs.snippez.util.JwtUtil;
 import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -25,10 +30,14 @@ public class UserController {
 
     private final UserService userService;
     private final CategoryService categoryService;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
-    public UserController(@Autowired UserService userService, CategoryService categoryService) {
+    public UserController(@Autowired UserService userService, CategoryService categoryService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.categoryService = categoryService;
+        this.jwtUtil = jwtUtil;
+        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping
@@ -65,6 +74,19 @@ public class UserController {
         }
 
         return ResponseEntity.ok(new BasicSingleResponse(true, u, Response.SC_OK));
+    }
+
+    @PostMapping("/authenticate")
+    public ResponseEntity<BasicSingleResponse> generateToken(@RequestBody AuthRequest authRequest) throws BadCredentialsException {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+            );
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("wrong credentials.");
+        }
+
+        return  ResponseEntity.ok(new BasicSingleResponse(true,jwtUtil.generateToken(authRequest.getUsername()), Response.SC_OK));
     }
 
     //TODO: only execute if user is authenticated and is given user

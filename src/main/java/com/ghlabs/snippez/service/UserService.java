@@ -6,16 +6,20 @@ import com.ghlabs.snippez.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.NonUniqueResultException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository mRepository;
     int bcryptStrength = 10;
     BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(bcryptStrength, new SecureRandom());
@@ -88,5 +92,11 @@ public class UserService {
                 .setMatchingStrategy(MatchingStrategies.LOOSE);
         return modelMapper
                 .map(user, UserDTO.class);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        User u = mRepository.findUserByUsername(s);
+        return new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(), new ArrayList<>());
     }
 }
