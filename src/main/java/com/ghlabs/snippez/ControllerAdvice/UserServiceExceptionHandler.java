@@ -53,10 +53,4 @@ public class UserServiceExceptionHandler {
         ApiErrorResponse error = new ApiErrorResponse(new ApiError(HttpStatus.BAD_REQUEST, e.getBindingResult().getFieldError().getDefaultMessage()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
-
-    @ExceptionHandler({BadCredentialsException.class})
-    public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException e) {
-        ApiErrorResponse error = new ApiErrorResponse(new ApiError(HttpStatus.UNAUTHORIZED, e.getMessage()));
-        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-    }
 }
