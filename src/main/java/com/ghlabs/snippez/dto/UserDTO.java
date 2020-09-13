@@ -27,6 +27,8 @@ public class UserDTO {
 
     private String avatar;
 
+    private String role;
+
     private List<CategoryDTO> categories = new ArrayList<>();
 
     private Date createdAt;

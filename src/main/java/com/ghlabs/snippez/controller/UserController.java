@@ -68,6 +68,7 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<BasicSingleResponse> createUser(@Valid @RequestBody @NotBlank User user) throws UserAlreadyExistsException, HttpMessageNotReadableException {
+        user.setRole("member");
         User u = userService.addUser(user);
         if (u == null) {
             throw new UserAlreadyExistsException(user.getUsername());

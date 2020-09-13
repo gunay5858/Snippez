@@ -38,6 +38,8 @@ public class User implements Serializable {
 
     private String avatar;
 
+    private String role;
+
     @ManyToMany(mappedBy = "sharedUsers")
     private List<CodeSnippet> sharedSnippets;
 
