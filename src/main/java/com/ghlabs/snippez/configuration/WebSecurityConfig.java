@@ -29,9 +29,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtFilter jwtFilter;
 
-    @Autowired
-    private JwtAuthEntryPoint jwtAuthEntryPoint;
-
     @Value("${spring.data.rest.base-path}")
     private String apiPrefix;
 
@@ -55,10 +52,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, apiPrefix + "/authenticate").permitAll()
-                .anyRequest().authenticated()
-                //.antMatchers(HttpMethod.GET, apiPrefix + "/category/**").authenticated()
-                .and().exceptionHandling().authenticationEntryPoint(new JwtAuthEntryPoint())
+                .antMatchers(HttpMethod.POST, apiPrefix + "/user/authenticate").permitAll()
+                .and().authorizeRequests()
+
+                .antMatchers(HttpMethod.GET, apiPrefix + "/category/**").authenticated()
+                .antMatchers(HttpMethod.GET, apiPrefix + "/user/**").authenticated()
+                .antMatchers(HttpMethod.GET, apiPrefix + "/snippet/**").authenticated()
+
+                .and().exceptionHandling()
                 .and().sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
