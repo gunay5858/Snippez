@@ -2,53 +2,82 @@ package com.ghlabs.snippez.controller;
 
 import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.dto.CodeSnippetDTO;
+import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.CodeSnippet;
 import com.ghlabs.snippez.exception.CodeSnippetCreatorNotFoundException;
+import com.ghlabs.snippez.exception.WrongUserException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
 import com.ghlabs.snippez.service.CodeSnippetService;
+import com.ghlabs.snippez.service.UserService;
 import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/snippet")
 public class CodeSnippetController {
     private final CodeSnippetService codeSnippetService;
     private final CategoryService categoryService;
+    private final UserService userService;
 
-    public CodeSnippetController(@Autowired CodeSnippetService codeSnippetService, @Autowired CategoryService categoryService) {
+    public CodeSnippetController(@Autowired CodeSnippetService codeSnippetService, @Autowired CategoryService categoryService, @Autowired UserService userService) {
         this.codeSnippetService = codeSnippetService;
         this.categoryService = categoryService;
+        this.userService = userService;
     }
 
-    @GetMapping
+    @GetMapping("/category/{categoryId}")
     @ResponseBody
-    public ResponseEntity<BasicListResponse> findAllCodeSnippets() {
-        return ResponseEntity.ok(new BasicListResponse(true, codeSnippetService.findAllCodeSnippets(), Response.SC_OK));
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicListResponse> findAllCodeSnippetsOfCategory(@PathVariable("categoryId") @NotBlank long categoryId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        List<CodeSnippetDTO> snippets = codeSnippetService.findAllCodeSnippetsOfCategory(categoryId);
+
+        UserDTO user = userService.findUserByUsername(auth.getName());
+        snippets = snippets.stream().filter(s -> s.getSharedUsers().contains(user) && s.isPublic()).collect(Collectors.toList());
+
+        return ResponseEntity.ok(new BasicListResponse(true, snippets, Response.SC_OK));
     }
-
-
 
     @GetMapping(value = "/id/{snippetId}")
-    public ResponseEntity<BasicSingleResponse> findCodeSnippetById(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> findCodeSnippetById(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException, WrongUserException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         CodeSnippetDTO foundSnippet = codeSnippetService.findById(snippetId);
         if (foundSnippet == null) {
             throw new NotFoundException("code snippet not found.");
+        }
+
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!auth.getName().equals(foundSnippet.getCreator().getUsername())) {
+                throw new WrongUserException("this snippet does not belong to you.");
+            }
         }
 
         return ResponseEntity.ok(new BasicSingleResponse(true, codeSnippetService.findById(snippetId), Response.SC_OK));
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@Valid @RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> createCodeSnippet(@Valid @RequestBody @NotBlank CodeSnippet codeSnippet) throws HttpMessageNotReadableException, NotFoundException, CodeSnippetCreatorNotFoundException, WrongUserException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         if (codeSnippet == null) {
             throw new HttpMessageNotReadableException(null);
         }
@@ -67,11 +96,20 @@ public class CodeSnippetController {
 
         CodeSnippetDTO c = codeSnippetService.addCodeSnippet(codeSnippet);
 
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!c.getCategory().getCreator().getUsername().equals(auth.getName())) {
+                throw new WrongUserException("this category is not yours.");
+            }
+        }
+
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
     }
 
     @PutMapping("/update/{snippetId}")
-    public ResponseEntity<BasicSingleResponse> updateCodeSnippet(@PathVariable("snippetId") @NotBlank Long snippetId, @RequestBody @NotBlank CodeSnippet codeSnippet) throws NotFoundException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> updateCodeSnippet(@PathVariable("snippetId") @NotBlank Long snippetId, @RequestBody @NotBlank CodeSnippet codeSnippet) throws NotFoundException, WrongUserException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         CodeSnippetDTO foundCodeSnippet = codeSnippetService.findById(snippetId);
         if (foundCodeSnippet == null) {
             throw new NotFoundException("code snippet not found.");
@@ -86,15 +124,36 @@ public class CodeSnippetController {
             codeSnippet.setCategory(null);
         }
 
+
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!foundCodeSnippet.getCategory().getCreator().getUsername().equals(auth.getName())) {
+                throw new WrongUserException("this category is not yours.");
+            }
+
+            if (!foundCodeSnippet.getCreator().getUsername().equals(auth.getName())) {
+                throw new WrongUserException("this codeSnippet is not yours.");
+            }
+        }
+
         return ResponseEntity.ok(new BasicSingleResponse(true, codeSnippetService.updateCodeSnippet(snippetId, codeSnippet), Response.SC_OK));
     }
 
     @DeleteMapping(value = "/delete/{snippetId}")
-    public ResponseEntity<BasicSingleResponse> deleteCodeSnippet(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> deleteCodeSnippet(@PathVariable("snippetId") @NotBlank long snippetId) throws NotFoundException, WrongUserException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         CodeSnippetDTO foundSnippet = codeSnippetService.findById(snippetId);
         if (foundSnippet == null) {
             throw new NotFoundException("code snippet not found.");
         }
+
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!foundSnippet.getCreator().getUsername().equals(auth.getName())) {
+                throw new WrongUserException("this codeSnippet is not yours.");
+            }
+        }
+
 
         codeSnippetService.deleteCodeSnippetById(snippetId);
         return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));

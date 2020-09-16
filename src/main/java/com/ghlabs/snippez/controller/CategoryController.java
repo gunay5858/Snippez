@@ -3,6 +3,8 @@ package com.ghlabs.snippez.controller;
 import com.ghlabs.snippez.dto.CategoryDTO;
 import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
+import com.ghlabs.snippez.exception.UserIsBlockedException;
+import com.ghlabs.snippez.exception.WrongUserException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
@@ -12,6 +14,11 @@ import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,22 +37,27 @@ public class CategoryController {
 
     @GetMapping
     @ResponseBody
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicListResponse> findAllCategories() {
-        return ResponseEntity.ok(new BasicListResponse(true, categoryService.findAllCategories(), Response.SC_OK));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok(new BasicListResponse(true, categoryService.findCategoriesOfUser(userService.findUserByUsername(auth.getName()).getId()), Response.SC_OK));
     }
 
     @GetMapping("/id/{catId}")
     @ResponseBody
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicSingleResponse> findCategoryById(@PathVariable("catId") @NotBlank Long catId) throws NotFoundException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CategoryDTO foundCategory = categoryService.findCategoryById(catId);
-        if (foundCategory == null) {
+        if (foundCategory == null || !foundCategory.getCreator().getUsername().equals(auth.getName())) {
             throw new NotFoundException("category not found.");
         }
         return ResponseEntity.ok(new BasicSingleResponse(true, foundCategory, Response.SC_OK));
     }
 
     @PostMapping("/create")
-    public ResponseEntity<BasicSingleResponse> createCategory(@Valid @RequestBody @NotBlank Category category) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> createCategory(@Valid @RequestBody @NotBlank Category category) throws HttpMessageNotReadableException, CategoryCreatorNotFoundException, WrongUserException, UserIsBlockedException {
         if (category == null) {
             throw new HttpMessageNotReadableException(null);
         }
@@ -60,23 +72,50 @@ public class CategoryController {
             throw new CategoryCreatorNotFoundException("The provided creator does not exist.");
         }
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!auth.getName().equals(c.getCreator().getUsername())) {
+                throw new WrongUserException("this is not you.");
+            }
+
+            if (!userService.checkUserIsEnabled(auth.getName())) {
+                throw new UserIsBlockedException("you are blocked.");
+            }
+        }
+
         return ResponseEntity.ok(new BasicSingleResponse(true, c, Response.SC_OK));
     }
 
     @PutMapping("/update/{catId}")
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicSingleResponse> updateCategory(@PathVariable("catId") @NotBlank Long catId, @RequestBody @NotBlank Category category) throws NotFoundException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CategoryDTO foundCategory = categoryService.findCategoryById(catId);
         if (foundCategory == null) {
             throw new NotFoundException("category not found.");
+        }
+
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!foundCategory.getCreator().getUsername().equals(auth.getName())) {
+                throw new AccessDeniedException("you are not allowed to do this");
+            }
         }
         return ResponseEntity.ok(new BasicSingleResponse(true, categoryService.updateCategory(catId, category), Response.SC_OK));
     }
 
     @DeleteMapping(value = "/delete/{catId}")
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicSingleResponse> deleteCategory(@PathVariable("catId") @NotBlank long catId) throws NotFoundException {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CategoryDTO foundCategory = categoryService.findCategoryById(catId);
         if (foundCategory == null) {
             throw new NotFoundException("category not found.");
+        }
+
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+            if (!foundCategory.getCreator().getUsername().equals(auth.getName())) {
+                throw new AccessDeniedException("you are not allowed to do this");
+            }
         }
 
         categoryService.deleteCategoryById(catId);

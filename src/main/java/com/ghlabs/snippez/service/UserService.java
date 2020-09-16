@@ -6,7 +6,9 @@ import com.ghlabs.snippez.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -57,8 +59,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public User findUserByUsername(String username) throws NonUniqueResultException {
-        return this.mRepository.findUserByUsername(username);
+    public UserDTO findUserByUsername(String username) throws NonUniqueResultException {
+        return convertToUserDTO(this.mRepository.findUserByUsername(username));
     }
 
     public UserDTO updateUser(Long id, User user) {
@@ -77,6 +79,10 @@ public class UserService implements UserDetailsService {
 
             if (user.getEmail() != null) {
                 dbUser.setEmail(user.getEmail());
+            }
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+                dbUser.setEnabled(user.isEnabled());
             }
 
             return modelMapper.map(mRepository.save(dbUser), UserDTO.class);
@@ -101,5 +107,9 @@ public class UserService implements UserDetailsService {
         User u = mRepository.findUserByUsername(s);
 
         return new org.springframework.security.core.userdetails.User(u.getUsername(), u.getPassword(), Arrays.asList(new SimpleGrantedAuthority(u.getRole())));
+    }
+
+    public boolean checkUserIsEnabled(String username) {
+        return findUserByUsername(username).isEnabled();
     }
 }

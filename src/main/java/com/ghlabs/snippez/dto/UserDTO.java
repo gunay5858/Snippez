@@ -27,6 +27,8 @@ public class UserDTO {
 
     private String avatar;
 
+    private boolean enabled;
+
     private String role;
 
     private List<CategoryDTO> categories = new ArrayList<>();

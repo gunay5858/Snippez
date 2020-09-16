@@ -14,6 +14,7 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -31,16 +32,16 @@ public class CodeSnippetService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<CodeSnippetDTO> findAllCodeSnippets() {
-        return ((List<CodeSnippet>) codeSnippetRepository
-                .findAll())
+    public List<CodeSnippetDTO> findAllCodeSnippetsOfCategory(Long categoryId) {
+        return codeSnippetRepository
+                .findCodeSnippetsOfCategory(categoryId)
                 .stream()
                 .map(this::convertToCodeSnippetDTO)
                 .collect(Collectors.toList());
     }
 
     public CodeSnippetDTO addCodeSnippet(CodeSnippet codeSnippet) {
-        UserDTO creator = null;
+        UserDTO creator;
         try {
             creator = modelMapper.map(userRepository.findById(codeSnippet.getCreator().getId()).get(), UserDTO.class);
         } catch (NoSuchElementException e) {
@@ -55,6 +56,19 @@ public class CodeSnippetService {
         }
 
         codeSnippet.setCreator(modelMapper.map(creator, User.class));
+
+        if (codeSnippet.getSharedUsers() != null) {
+            if (codeSnippet.getSharedUsers().size() > 0) {
+                ArrayList<User> sharedUsers = new ArrayList<>();
+
+                for (User u : codeSnippet.getSharedUsers()) {
+                    sharedUsers.add(userRepository.findUserByUsername(u.getUsername()));
+                }
+
+                codeSnippet.setSharedUsers(sharedUsers);
+            }
+        }
+
         return modelMapper.map(codeSnippetRepository.save(codeSnippet), CodeSnippetDTO.class);
     }
 
@@ -95,6 +109,18 @@ public class CodeSnippetService {
 
             if (codeSnippet.getTags() != null) {
                 dbSnippet.setTags(codeSnippet.getTags());
+            }
+
+            if (codeSnippet.getSharedUsers() != null) {
+                if (codeSnippet.getSharedUsers().size() > 0) {
+                    ArrayList<User> sharedUsers = new ArrayList<>();
+
+                    for (User u : codeSnippet.getSharedUsers()) {
+                        sharedUsers.add(userRepository.findUserByUsername(u.getUsername()));
+                    }
+
+                    dbSnippet.setSharedUsers(sharedUsers);
+                }
             }
 
             return modelMapper.map(codeSnippetRepository.save(dbSnippet), CodeSnippetDTO.class);
