@@ -20,7 +20,7 @@ import java.nio.file.StandardCopyOption;
 public class UserAvatarService {
     public Path avatarUploadDir = Paths.get("static/uploads/avatars/");
 
-    public String uploadFile(MultipartFile file) throws FileStorageException, IOException {
+    public String uploadFile(MultipartFile file) throws FileStorageException {
         if (!new File(avatarUploadDir.toString()).exists()) {
             new File(avatarUploadDir.toString()).mkdirs();
         }
@@ -30,7 +30,7 @@ public class UserAvatarService {
         try {
             // Check if the file's name contains invalid characters
             if (fileName.contains("..")) {
-                throw new FileStorageException("Sorry! Filename contains invalid path sequence " + fileName);
+                throw new FileStorageException("Filename contains invalid path sequence " + fileName);
             }
 
             // Copy file to the target location (Replacing existing file with the same name)

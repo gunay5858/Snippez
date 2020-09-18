@@ -1,19 +1,27 @@
 package com.ghlabs.snippez.controller;
 
 import com.ghlabs.snippez.dto.AuthRequest;
+import com.ghlabs.snippez.dto.UploadFileDTO;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
+import com.ghlabs.snippez.exception.FileStorageException;
 import com.ghlabs.snippez.exception.UserAlreadyExistsException;
 import com.ghlabs.snippez.exception.UserIsBlockedException;
 import com.ghlabs.snippez.exception.WrongUserException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
+import com.ghlabs.snippez.service.UserAvatarService;
 import com.ghlabs.snippez.service.UserService;
 import com.ghlabs.snippez.util.JwtUtil;
 import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,25 +33,35 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+
     private final UserService userService;
     private final CategoryService categoryService;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final UserAvatarService userAvatarService;
 
-    public UserController(@Autowired UserService userService, CategoryService categoryService, JwtUtil jwtUtil, AuthenticationManager authenticationManager) {
+    public UserController(@Autowired UserService userService, @Autowired CategoryService categoryService, @Autowired JwtUtil jwtUtil, @Autowired AuthenticationManager authenticationManager, @Autowired UserAvatarService userAvatarService) {
         this.userService = userService;
         this.categoryService = categoryService;
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
+        this.userAvatarService = userAvatarService;
     }
 
     @GetMapping
@@ -154,5 +172,42 @@ public class UserController {
         }
         userService.deleteUserById(userId);
         return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
+    }
+
+    @PostMapping("/avatar/upload")
+    public ResponseEntity<BasicSingleResponse> uploadFile(@RequestParam("file") MultipartFile file) throws IOException, FileStorageException {
+        String fileName = userAvatarService.uploadFile(file);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/user/avatar/")
+                .path(fileName)
+                .toUriString();
+
+        return ResponseEntity.ok(new BasicSingleResponse(true, new UploadFileDTO(fileName, fileDownloadUri,
+                file.getContentType(), file.getSize()), Response.SC_OK));
+    }
+
+    @GetMapping("/avatar/{fileName:.+}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable @NotBlank String fileName, HttpServletRequest request) throws FileNotFoundException {
+        // Load file as Resource
+        Resource resource = userAvatarService.loadFileAsResource(fileName);
+
+        // Try to determine file's content type
+        String contentType = null;
+        try {
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            logger.info("Could not determine file type.");
+        }
+
+        // Fallback to the default content type if type could not be determined
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }
