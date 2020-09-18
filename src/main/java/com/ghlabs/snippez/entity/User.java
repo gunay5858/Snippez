@@ -36,7 +36,7 @@ public class User implements Serializable {
     @NotEmpty(message = "Please provide an email")
     private String email;
 
-    private String avatar;
+    private String avatar = "defaultAvatar.png";
 
     private boolean enabled = true;
 

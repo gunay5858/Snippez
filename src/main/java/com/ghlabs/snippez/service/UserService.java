@@ -75,7 +75,7 @@ public class UserService implements UserDetailsService {
             }
 
             if (user.getAvatar() != null) {
-                dbUser.setAvatar(user.getAvatar());
+                dbUser.setAvatar(user.getAvatar().substring(user.getAvatar().lastIndexOf("/") + 1));
             }
 
             if (user.getEmail() != null) {
