@@ -4,10 +4,7 @@ import com.ghlabs.snippez.dto.AuthRequest;
 import com.ghlabs.snippez.dto.UploadFileDTO;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
-import com.ghlabs.snippez.exception.FileStorageException;
-import com.ghlabs.snippez.exception.UserAlreadyExistsException;
-import com.ghlabs.snippez.exception.UserIsBlockedException;
-import com.ghlabs.snippez.exception.WrongUserException;
+import com.ghlabs.snippez.exception.*;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
@@ -36,6 +33,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.activation.MimetypesFileTypeMap;
+import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -174,10 +173,15 @@ public class UserController {
         return ResponseEntity.ok(new BasicSingleResponse(true, null, Response.SC_OK));
     }
 
+    // TODO: check only images are uploaded
     @PostMapping("/avatar/upload")
-    public ResponseEntity<BasicSingleResponse> uploadFile(@RequestParam("file") MultipartFile file) throws IOException, FileStorageException {
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
+    public ResponseEntity<BasicSingleResponse> uploadFile(@RequestParam("file") MultipartFile file) throws FileStorageException, FileTypeNotAllowedException {
+
+        // upload file
         String fileName = userAvatarService.uploadFile(file);
 
+        // create resource and return
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/user/avatar/")
                 .path(fileName)
@@ -188,6 +192,7 @@ public class UserController {
     }
 
     @GetMapping("/avatar/{fileName:.+}")
+    @PermitAll
     public ResponseEntity<Resource> downloadFile(@PathVariable @NotBlank String fileName, HttpServletRequest request) throws FileNotFoundException {
         // Load file as Resource
         Resource resource = userAvatarService.loadFileAsResource(fileName);
@@ -197,17 +202,11 @@ public class UserController {
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
         } catch (IOException ex) {
-            logger.info("Could not determine file type.");
-        }
-
-        // Fallback to the default content type if type could not be determined
-        if (contentType == null) {
-            contentType = "application/octet-stream";
+            contentType = MediaType.APPLICATION_OCTET_STREAM.getType();
         }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
                 .body(resource);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.NonUniqueResultException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
