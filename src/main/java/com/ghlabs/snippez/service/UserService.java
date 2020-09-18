@@ -43,7 +43,9 @@ public class UserService implements UserDetailsService {
     }
 
     public User addUser(User user) {
-        if (findUserByUsername(user.getUsername()) == null) {
+        try {
+            findUserByUsername(user.getUsername());
+        } catch (NullPointerException | IllegalArgumentException e) {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
             return mRepository.save(user);
         }

@@ -43,7 +43,7 @@ public class User implements Serializable {
     private String role;
 
     @ManyToMany(mappedBy = "sharedUsers")
-    private List<CodeSnippet> sharedSnippets;
+    private List<CodeSnippet> sharedSnippets = new ArrayList<>();
 
     @OneToMany(mappedBy = "creator",
             targetEntity = Category.class,
