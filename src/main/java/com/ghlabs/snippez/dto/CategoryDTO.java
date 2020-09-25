@@ -23,6 +23,8 @@ public class CategoryDTO {
 
     private String name;
 
+    private int snippetCount;
+
     private String icon;
 
     private UserDTO creator;
@@ -32,6 +34,15 @@ public class CategoryDTO {
     private Date createdAt;
 
     private Date updatedAt;
+
+    public CategoryDTO(Long id, String name, int snippetCount, String icon, Date createdAt, Date updatedAt) {
+        this.id = id;
+        this.name = name;
+        this.snippetCount = snippetCount;
+        this.icon = icon;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     @Override
     public boolean equals(Object o) {

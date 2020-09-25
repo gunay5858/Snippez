@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -26,12 +25,8 @@ public class CategoryService {
         this.userRepository = userRepository;
     }
 
-    public List<CategoryDTO> findAllCategories() {
-        return ((List<Category>) categoryRepository
-                .findAll())
-                .stream()
-                .map(this::convertToCategoryDTO)
-                .collect(Collectors.toList());
+    public List<CategoryDTO> findCategoriesOfUser(Long userId) {
+        return categoryRepository.findCategoriesOfUser(userId);
     }
 
     public CategoryDTO addCategory(Category category) {
@@ -78,14 +73,6 @@ public class CategoryService {
         categoryRepository.deleteById(catId);
     }
 
-
-    public List<CategoryDTO> findCategoriesOfUser(Long userId) {
-        return ((List<Category>) categoryRepository
-                .findCategoriesOfUser(userId))
-                .stream()
-                .map(this::convertToCategoryDTO)
-                .collect(Collectors.toList());
-    }
 
     private CategoryDTO convertToCategoryDTO(Category category) {
         modelMapper.getConfiguration()
