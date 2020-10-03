@@ -1,6 +1,7 @@
 package com.ghlabs.snippez.controller;
 
 import com.ghlabs.snippez.dto.CategoryDTO;
+import com.ghlabs.snippez.dto.CodeSnippetDTO;
 import com.ghlabs.snippez.entity.Category;
 import com.ghlabs.snippez.exception.CategoryCreatorNotFoundException;
 import com.ghlabs.snippez.exception.UserIsBlockedException;
@@ -8,6 +9,7 @@ import com.ghlabs.snippez.exception.WrongUserException;
 import com.ghlabs.snippez.response.BasicListResponse;
 import com.ghlabs.snippez.response.BasicSingleResponse;
 import com.ghlabs.snippez.service.CategoryService;
+import com.ghlabs.snippez.service.CodeSnippetService;
 import com.ghlabs.snippez.service.UserService;
 import javassist.NotFoundException;
 import org.apache.catalina.connector.Response;
@@ -23,16 +25,19 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
     private final CategoryService categoryService;
     private final UserService userService;
+    private final CodeSnippetService codeSnippetService;
 
-    public CategoryController(@Autowired CategoryService categoryService, @Autowired UserService userService) {
+    public CategoryController(@Autowired CategoryService categoryService, @Autowired UserService userService, CodeSnippetService codeSnippetService) {
         this.categoryService = categoryService;
         this.userService = userService;
+        this.codeSnippetService = codeSnippetService;
     }
 
     @GetMapping
@@ -40,7 +45,14 @@ public class CategoryController {
     @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicListResponse> findAllCategories() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return ResponseEntity.ok(new BasicListResponse(true, categoryService.findCategoriesOfUser(userService.findUserByUsername(auth.getName()).getId()), Response.SC_OK));
+        Long userId = userService.findUserByUsername(auth.getName()).getId();
+
+        List<CategoryDTO> categories = categoryService.findCategoriesOfUser(userId);
+        List<CodeSnippetDTO> uncategorizedSnippets = codeSnippetService.findUncategorizedSnippetsOfUser(userId);
+        categories.add(new CategoryDTO("Uncategorized", uncategorizedSnippets.size(), "icon-shell", uncategorizedSnippets));
+
+
+        return ResponseEntity.ok(new BasicListResponse(true, categories, Response.SC_OK));
     }
 
     @GetMapping("/id/{catId}")

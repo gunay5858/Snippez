@@ -31,6 +31,9 @@ public class Category implements Serializable {
 
     private String icon;
 
+    @Transient
+    private int snippetCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
     private User creator;
@@ -71,18 +74,6 @@ public class Category implements Serializable {
         return Objects.hash(id);
     }
 
-    @Override
-    public String toString() {
-        return "Category{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", icon='" + icon + '\'' +
-                ", creator=" + creator +
-                ", snippets=" + snippets +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
-    }
 
     @PreRemove
     void preRemove() {

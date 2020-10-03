@@ -29,11 +29,18 @@ public class CategoryDTO {
 
     private UserDTO creator;
 
-    private List<CodeSnippet> snippets;
+    private List<CodeSnippetDTO> snippets;
 
     private Date createdAt;
 
     private Date updatedAt;
+
+    public CategoryDTO(String name, int snippetCount, String icon, List<CodeSnippetDTO> snippets) {
+        this.name = name;
+        this.snippetCount = snippetCount;
+        this.icon = icon;
+        this.snippets = snippets;
+    }
 
     public CategoryDTO(Long id, String name, int snippetCount, String icon, Date createdAt, Date updatedAt) {
         this.id = id;

@@ -43,13 +43,13 @@ public class CodeSnippetController {
     @GetMapping("/category/{categoryId}")
     @ResponseBody
     @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
-    public ResponseEntity<BasicListResponse> findAllCodeSnippetsOfCategory(@PathVariable("categoryId") @NotBlank long categoryId) {
+    public ResponseEntity<BasicListResponse> findAllCodeSnippetsOfCategory(@PathVariable("categoryId") @NotBlank Long categoryId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         List<CodeSnippetDTO> snippets = codeSnippetService.findAllCodeSnippetsOfCategory(categoryId);
 
         UserDTO user = userService.findUserByUsername(auth.getName());
-        snippets = snippets.stream().filter(s -> s.getSharedUsers().contains(user) && s.isPublic()).collect(Collectors.toList());
+        snippets = snippets.stream().filter(s -> s.getSharedUsers().contains(user) && s.isPublic() || s.getCreator().getId().equals(user.getId())).collect(Collectors.toList());
 
         return ResponseEntity.ok(new BasicListResponse(true, snippets, Response.SC_OK));
     }
@@ -96,7 +96,7 @@ public class CodeSnippetController {
 
         CodeSnippetDTO c = codeSnippetService.addCodeSnippet(codeSnippet);
 
-        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin"))) {
+        if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("admin")) && c.getCategory() != null) {
             if (!c.getCategory().getCreator().getUsername().equals(auth.getName())) {
                 throw new WrongUserException("this category is not yours.");
             }

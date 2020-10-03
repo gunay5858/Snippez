@@ -49,6 +49,23 @@ public class CodeSnippetDTO {
     }
 
     @Override
+    public String toString() {
+        return "CodeSnippetDTO{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", creator=" + creator +
+                ", category=" + category +
+                ", description='" + description + '\'' +
+                ", code='" + code + '\'' +
+                ", isPublic=" + isPublic +
+                ", tags='" + tags + '\'' +
+                ", sharedUsers=" + sharedUsers +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(id);
     }

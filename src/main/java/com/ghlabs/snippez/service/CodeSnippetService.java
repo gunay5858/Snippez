@@ -133,6 +133,14 @@ public class CodeSnippetService {
         codeSnippetRepository.deleteById(id);
     }
 
+    public List<CodeSnippetDTO> findUncategorizedSnippetsOfUser(Long userId) {
+        return codeSnippetRepository
+                .findUncategorizedSnippetsOfUser(userId)
+                .stream()
+                .map(this::convertToCodeSnippetDTO)
+                .collect(Collectors.toList());
+    }
+
     private CodeSnippetDTO convertToCodeSnippetDTO(CodeSnippet codeSnippet) {
         modelMapper.getConfiguration()
                 .setMatchingStrategy(MatchingStrategies.LOOSE);
