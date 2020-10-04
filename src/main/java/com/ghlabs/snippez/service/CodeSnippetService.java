@@ -33,6 +33,14 @@ public class CodeSnippetService {
     }
 
     public List<CodeSnippetDTO> findAllCodeSnippetsOfCategory(Long categoryId) {
+        if (categoryId == 0) {
+            return codeSnippetRepository
+                    .findCodeSnippetsWithoutCategory()
+                    .stream()
+                    .map(this::convertToCodeSnippetDTO)
+                    .collect(Collectors.toList());
+        }
+
         return codeSnippetRepository
                 .findCodeSnippetsOfCategory(categoryId)
                 .stream()

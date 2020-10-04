@@ -14,6 +14,9 @@ public interface CodeSnippetRepository extends CrudRepository<CodeSnippet, Long>
     @Query("SELECT c FROM CodeSnippet c WHERE c.category.id = :categoryId")
     public List<CodeSnippet> findCodeSnippetsOfCategory(@Param("categoryId") Long categoryId);
 
+    @Query("SELECT  c FROM CodeSnippet c WHERE c.category is null ")
+    public List<CodeSnippet> findCodeSnippetsWithoutCategory();
+
     @Query("SELECT cs FROM CodeSnippet cs WHERE cs.category is null AND cs.creator.id = :userId")
     public List<CodeSnippet> findUncategorizedSnippetsOfUser(@Param("userId") Long userId);
 }
