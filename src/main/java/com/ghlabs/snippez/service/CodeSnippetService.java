@@ -113,6 +113,10 @@ public class CodeSnippetService {
                 dbSnippet.setCode(codeSnippet.getCode());
             }
 
+            if (codeSnippet.getCodeLanguage() != null) {
+                dbSnippet.setCode(codeSnippet.getCodeLanguage());
+            }
+
             dbSnippet.setPublic(codeSnippet.isPublic());
 
             if (codeSnippet.getTags() != null) {
