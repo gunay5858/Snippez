@@ -30,6 +30,8 @@ public class CodeSnippetDTO {
 
     private String code;
 
+    private String codeLanguage;
+
     private boolean isPublic = true;
 
     private String tags;

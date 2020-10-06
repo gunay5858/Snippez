@@ -40,6 +40,9 @@ public class CodeSnippet implements Serializable {
     @NotEmpty(message = "Please provide some code")
     private String code;
 
+    @NotEmpty(message = "Please provide the language of your code")
+    private String codeLanguage;
+
     private boolean isPublic = true;
 
     private String tags;
