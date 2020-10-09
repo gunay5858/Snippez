@@ -35,8 +35,10 @@ public class CodeSnippet implements Serializable {
     @JoinColumn(name = "category", referencedColumnName = "id")
     private Category category;
 
+    @Lob
     private String description;
 
+    @Lob
     @NotEmpty(message = "Please provide some code")
     private String code;
 
