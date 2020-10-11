@@ -66,7 +66,7 @@ public class UserController {
 
     @GetMapping
     @ResponseBody
-    @PreAuthorize("hasAnyAuthority({'admin'})")
+    @PreAuthorize("hasAnyAuthority({'member', 'admin'})")
     public ResponseEntity<BasicListResponse> getAllUsers() {
         List<UserDTO> userList = userService.findAllUsers();
         return ResponseEntity.ok(new BasicListResponse(true, userList, Response.SC_OK));
