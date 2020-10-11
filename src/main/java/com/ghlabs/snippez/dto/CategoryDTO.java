@@ -35,7 +35,7 @@ public class CategoryDTO {
 
     private Date updatedAt;
 
-    public CategoryDTO(String name, int snippetCount, String icon, List<CodeSnippetDTO> snippets) {
+    public CategoryDTO(String name, int snippetCount, List<CodeSnippetDTO> snippets) {
         this.name = name;
         this.snippetCount = snippetCount;
         this.icon = icon;

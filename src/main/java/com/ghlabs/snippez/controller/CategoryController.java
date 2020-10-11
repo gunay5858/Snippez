@@ -49,7 +49,7 @@ public class CategoryController {
 
         List<CategoryDTO> categories = categoryService.findCategoriesOfUser(userId);
         List<CodeSnippetDTO> uncategorizedSnippets = codeSnippetService.findUncategorizedSnippetsOfUser(userId);
-        categories.add(new CategoryDTO("Uncategorized", uncategorizedSnippets.size(), "icon-shell", uncategorizedSnippets));
+        categories.add(new CategoryDTO("Uncategorized", uncategorizedSnippets.size(), uncategorizedSnippets));
 
 
         return ResponseEntity.ok(new BasicListResponse(true, categories, Response.SC_OK));
