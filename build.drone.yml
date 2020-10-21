@@ -1,61 +1,13 @@
-- name: push commit
-  image: appleboy/drone-git-push
-  settings:
-    branch: master
-    remote: git@github.com:gunay5858/SnippezApi.git
-    force: false
-    commit: true
-    ssh_key: "-----BEGIN RSA PRIVATE KEY-----
-      Proc-Type: 4,ENCRYPTED
-      DEK-Info: AES-128-CBC,E43066AC1E683B53549C65EF5D7BAC09
+kind: pipeline
+name: default
 
-      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
-      -----END RSA PRIVATE KEY-----"
+steps:
+  - name: push commit
+    image: appleboy/drone-git-push
+    settings:
+      branch: master
+      remote: git@github.com:gunay5858/SnippezApi.git
+      force: false
+      commit: true
+      ssh_key:
+        secret: ssh_private_key
