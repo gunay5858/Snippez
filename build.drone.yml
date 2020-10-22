@@ -6,13 +6,3 @@ steps:
     image: alpine:3.8
     commands:
       - echo "hello"
-
-#  - name: push commit
-#    image: appleboy/drone-git-push
-#    settings:
-#      branch: master
-#      remote: git@github.com:gunay5858/SnippezApi.git
-#      force: false
-#      commit: true
-#      ssh_key:
-#        secret: ssh_private_key
