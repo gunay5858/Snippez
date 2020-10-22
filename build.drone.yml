@@ -2,10 +2,10 @@ kind: pipeline
 name: default
 
 steps:
-  - name: pre-settings
-    image: alpine:3.8
-    commands:
-      - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+#  - name: pre-settings
+#    image: alpine:3.8
+#    commands:
+#      - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
 
   - name: push commit
     image: appleboy/drone-git-push
