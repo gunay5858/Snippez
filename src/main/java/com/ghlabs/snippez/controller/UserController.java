@@ -1,10 +1,9 @@
 package com.ghlabs.snippez.controller;
 
 import com.ghlabs.snippez.dto.AuthRequest;
+import com.ghlabs.snippez.dto.ReCaptchaRequest;
 import com.ghlabs.snippez.dto.UploadFileDTO;
 import com.ghlabs.snippez.dto.UserDTO;
-import com.ghlabs.snippez.entity.Category;
-import com.ghlabs.snippez.entity.CodeSnippet;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.exception.*;
 import com.ghlabs.snippez.response.BasicListResponse;
@@ -40,7 +39,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -62,6 +60,13 @@ public class UserController {
         this.jwtUtil = jwtUtil;
         this.authenticationManager = authenticationManager;
         this.userAvatarService = userAvatarService;
+    }
+
+    @PostMapping("/recaptcha/verify")
+    @ResponseBody
+    public ResponseEntity<BasicSingleResponse> validateReCaptcha(HttpServletRequest request, @RequestBody @NotBlank ReCaptchaRequest reCaptchaRequest) throws Exception {
+        reCaptchaRequest.setRemoteip(request.getRemoteAddr());
+        return ResponseEntity.ok(new BasicSingleResponse(true, userService.verifyReCaptcha(reCaptchaRequest), Response.SC_OK));
     }
 
     @GetMapping

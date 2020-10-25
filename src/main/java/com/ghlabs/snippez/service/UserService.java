@@ -1,11 +1,14 @@
 package com.ghlabs.snippez.service;
 
+import com.ghlabs.snippez.dto.ReCaptchaRequest;
+import com.ghlabs.snippez.dto.ReCaptchaResponseDTO;
 import com.ghlabs.snippez.dto.UserDTO;
 import com.ghlabs.snippez.entity.User;
 import com.ghlabs.snippez.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +17,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.NonUniqueResultException;
 import java.security.SecureRandom;
@@ -29,8 +36,17 @@ public class UserService implements UserDetailsService {
 
     private final ModelMapper modelMapper = new ModelMapper();
 
-    public UserService(@Autowired UserRepository mRepository) {
+    @Value("${ghlabs.app.recaptcha.secret}")
+    private String recaptchaSecret;
+
+    private final RestTemplate restTemplate;
+
+    private static final String GOOGLE_RECAPTCHA_VERIFY_URL =
+            "https://www.google.com/recaptcha/api/siteverify";
+
+    public UserService(@Autowired UserRepository mRepository, @Autowired RestTemplate restTemplate) {
         this.mRepository = mRepository;
+        this.restTemplate = restTemplate;
     }
 
     public List<UserDTO> findAllUsers() {
@@ -90,6 +106,26 @@ public class UserService implements UserDetailsService {
         } else {
             return null;
         }
+    }
+
+    public ReCaptchaResponseDTO verifyReCaptcha(ReCaptchaRequest reCaptchaRequest) throws Exception {
+        ReCaptchaResponseDTO recaptchaResponse;
+        try {
+            recaptchaResponse = restTemplate.postForEntity(
+                    GOOGLE_RECAPTCHA_VERIFY_URL, createBody(recaptchaSecret, reCaptchaRequest.getRemoteip(), reCaptchaRequest.getResponse()), ReCaptchaResponseDTO.class)
+                    .getBody();
+        } catch (RestClientException e) {
+            throw new Exception("Recaptcha API not available due to exception", e);
+        }
+        return recaptchaResponse;
+    }
+
+    private MultiValueMap<String, String> createBody(String secret, String remoteIp, String response) {
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("secret", secret);
+        form.add("remoteip", remoteIp);
+        form.add("response", response);
+        return form;
     }
 
     public void deleteUserById(Long id) {
